@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reports Dashboard - Retail Audit App</title>
+    <style>
+      :root {
+        --primary-50: #eff6ff;
+        --primary-100: #dbeafe;
+        --primary-500: #3b82f6;
+        --primary-600: #2563eb;
+        --primary-700: #1d4ed8;
+        --success-50: #f0fdf4;
+        --success-100: #dcfce7;
+        --success-500: #22c55e;
+        --success-600: #16a34a;
+        --warning-50: #fffbeb;
+        --warning-100: #fef3c7;
+        --warning-500: #f59e0b;
+        --warning-600: #d97706;
+        --error-50: #fef2f2;
+        --error-100: #fee2e2;
+        --error-500: #ef4444;
+        --error-600: #dc2626;
+        --neutral-0: #ffffff;
+        --neutral-50: #f9fafb;
+        --neutral-100: #f3f4f6;
+        --neutral-200: #e5e7eb;
+        --neutral-300: #d1d5db;
+        --neutral-400: #9ca3af;
+        --neutral-500: #6b7280;
+        --neutral-600: #4b5563;
+        --neutral-700: #374151;
+        --neutral-800: #1f2937;
+        --neutral-900: #111827;
+        --text-xs: 0.75rem;
+        --text-sm: 0.875rem;
+        --text-base: 1rem;
+        --text-lg: 1.125rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.5rem;
+        --leading-tight: 1.25;
+        --leading-normal: 1.5;
+        --font-normal: 400;
+        --font-medium: 500;
+        --font-semibold: 600;
+        --font-bold: 700;
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+        --radius-sm: 0.25rem;
+        --radius-md: 0.375rem;
+        --radius-lg: 0.5rem;
+        --radius-xl: 0.75rem;
+        --radius-2xl: 1rem;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .reports-phone-frame {
+        width: 375px;
+        min-height: 812px;
+        background: var(--neutral-0);
+        border-radius: 40px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--neutral-200);
+        margin: var(--space-8);
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .reports-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        color: var(--neutral-0);
+        padding: var(--space-4);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      
+      .header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-3);
+      }
+      
+      .reports-title {
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+        margin: 0;
+      }
+      
+      .header-button {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: var(--radius-lg);
+        padding: var(--space-2);
+        color: var(--neutral-0);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .header-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      
+      .date-filter {
+        display: flex;
+        gap: var(--space-2);
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      
+      .date-filter::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .filter-chip {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: var(--radius-xl);
+        padding: var(--space-1) var(--space-3);
+        font-size: var(--text-xs);
+        font-weight: var(--font-medium);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        color: var(--neutral-0);
+      }
+      
+      .filter-chip.active {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+      
+      .filter-chip:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+      
+      .reports-content {
+        flex: 1;
+        overflow-y: auto;
+        background: var(--neutral-50);
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      
+      .reports-content::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .content-section {
+        padding: var(--space-4);
+      }
+      
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-4);
+      }
+      
+      .section-title {
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+        color: var(--neutral-800);
+        margin: 0;
+      }
+      
+      .view-all-link {
+        font-size: var(--text-sm);
+        color: var(--primary-600);
+        text-decoration: none;
+        font-weight: var(--font-medium);
+      }
+      
+      .view-all-link:hover {
+        color: var(--primary-700);
+      }
+      
+      .report-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+        margin-bottom: var(--space-6);
+      }
+      
+      .report-card {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+      }
+      
+      .report-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+      
+      .report-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: var(--space-3);
+        font-size: var(--text-xl);
+        color: var(--neutral-0);
+      }
+      
+      .report-title {
+        font-size: var(--text-base);
+        font-weight: var(--font-semibold);
+        color: var(--neutral-800);
+        margin-bottom: var(--space-1);
+      }
+      
+      .report-desc {
+        font-size: var(--text-sm);
+        color: var(--neutral-600);
+        line-height: var(--leading-normal);
+        margin-bottom: var(--space-2);
+      }
+      
+      .report-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: var(--text-xs);
+        color: var(--neutral-500);
+      }
+      
+      .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+        margin-bottom: var(--space-6);
+      }
+      
+      .summary-card {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-500), #8b5cf6);
+      }
+      
+      .summary-number {
+        font-size: var(--text-2xl);
+        font-weight: var(--font-bold);
+        color: var(--primary-600);
+        margin-bottom: var(--space-1);
+      }
+      
+      .summary-label {
+        font-size: var(--text-sm);
+        color: var(--neutral-600);
+        margin-bottom: var(--space-2);
+      }
+      
+      .summary-trend {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-1);
+        font-size: var(--text-xs);
+        font-weight: var(--font-medium);
+      }
+      
+      .trend-up {
+        color: var(--success-600);
+      }
+      
+      .trend-down {
+        color: var(--error-600);
+      }
+      
+      .chart-container {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        margin-bottom: var(--space-6);
+      }
+      
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-4);
+      }
+      
+      .chart-title {
+        font-size: var(--text-base);
+        font-weight: var(--font-semibold);
+        color: var(--neutral-800);
+        margin: 0;
+      }
+      
+      .chart-view {
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary-50) 0%, var(--success-50) 100%);
+        border-radius: var(--radius-lg);
+        position: relative;
+        overflow: hidden;
+        margin-bottom: var(--space-3);
+      }
+      
+      .chart-bars {
+        display: flex;
+        align-items: end;
+        gap: var(--space-1);
+        height: 80px;
+        margin: var(--space-3) 0;
+        padding: 0 var(--space-2);
+      }
+      
+      .chart-bar {
+        flex: 1;
+        background: linear-gradient(to top, var(--primary-600), var(--primary-400));
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        min-height: 8px;
+        transition: all 0.3s ease;
+      }
+      
+      .chart-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: var(--text-xs);
+        color: var(--neutral-500);
+      }
+      
+      .recent-reports {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        margin-bottom: var(--space-6);
+      }
+      
+      .report-item {
+        display: flex;
+        align-items: center;
+        padding: var(--space-3);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-2);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+      
+      .report-item:hover {
+        background: var(--neutral-50);
+      }
+      
+      .report-item:last-child {
+        margin-bottom: 0;
+      }
+      
+      .report-status {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: var(--space-3);
+        flex-shrink: 0;
+      }
+      
+      .status-ready {
+        background: var(--success-500);
+      }
+      
+      .status-processing {
+        background: var(--warning-500);
+      }
+      
+      .status-error {
+        background: var(--error-500);
+      }
+      
+      .report-details {
+        flex: 1;
+      }
+      
+      .report-name {
+        font-size: var(--text-sm);
+        font-weight: var(--font-medium);
+        color: var(--neutral-800);
+        margin-bottom: var(--space-1);
+      }
+      
+      .report-time {
+        font-size: var(--text-xs);
+        color: var(--neutral-500);
+      }
+      
+      .report-action {
+        background: var(--primary-100);
+        color: var(--primary-600);
+        border: none;
+        border-radius: var(--radius-md);
+        padding: var(--space-1) var(--space-2);
+        font-size: var(--text-xs);
+        font-weight: var(--font-medium);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .report-action:hover {
+        background: var(--primary-200);
+      }
+      
+      .export-section {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        margin-bottom: var(--space-6);
+      }
+      
+      .export-buttons {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+        margin-top: var(--space-3);
+      }
+      
+      .export-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-3);
+        border-radius: var(--radius-lg);
+        font-size: var(--text-sm);
+        font-weight: var(--font-medium);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+        gap: var(--space-2);
+      }
+      
+      .export-btn.pdf {
+        background: var(--error-600);
+        color: var(--neutral-0);
+      }
+      
+      .export-btn.pdf:hover {
+        background: var(--error-700);
+        transform: translateY(-1px);
+      }
+      
+      .export-btn.excel {
+        background: var(--success-600);
+        color: var(--neutral-0);
+      }
+      
+      .export-btn.excel:hover {
+        background: var(--success-700);
+        transform: translateY(-1px);
+      }
+      
+      .export-btn.email {
+        background: var(--primary-600);
+        color: var(--neutral-0);
+      }
+      
+      .export-btn.email:hover {
+        background: var(--primary-700);
+        transform: translateY(-1px);
+      }
+      
+      .export-btn.share {
+        background: var(--warning-600);
+        color: var(--neutral-0);
+      }
+      
+      .export-btn.share:hover {
+        background: var(--warning-700);
+        transform: translateY(-1px);
+      }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body style="background: var(--neutral-100); margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div class="reports-phone-frame">
+      <!-- Header -->
+      <div class="reports-header">
+        <div class="header-controls">
+          <button onclick="goBack()" class="header-button">
+            <i class="fas fa-arrow-left" style="font-size: var(--text-xl);"></i>
+          </button>
+          <h1 class="reports-title">Reports Dashboard</h1>
+          <button onclick="refreshReports()" class="header-button">
+            <i class="fas fa-sync-alt" style="font-size: var(--text-xl);"></i>
+          </button>
+        </div>
+        
+        <div class="date-filter">
+          <button onclick="setDateFilter('today')" class="filter-chip active" id="filter-today">Today</button>
+          <button onclick="setDateFilter('week')" class="filter-chip" id="filter-week">This Week</button>
+          <button onclick="setDateFilter('month')" class="filter-chip" id="filter-month">This Month</button>
+          <button onclick="setDateFilter('quarter')" class="filter-chip" id="filter-quarter">Quarter</button>
+          <button onclick="setDateFilter('year')" class="filter-chip" id="filter-year">Year</button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="reports-content">
+        <!-- Summary Cards -->
+        <div class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Overview</h2>
+            <a href="kpi-metrics-report.html" class="view-all-link">View KPIs</a>
+          </div>
+          
+          <div class="summary-cards">
+            <div class="summary-card">
+              <div class="summary-number">47</div>
+              <div class="summary-label">Reports Generated</div>
+              <div class="summary-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                <span>+12%</span>
+              </div>
+            </div>
+            
+            <div class="summary-card">
+              <div class="summary-number">94.2%</div>
+              <div class="summary-label">Compliance Rate</div>
+              <div class="summary-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                <span>+2.3%</span>
+              </div>
+            </div>
+            
+            <div class="summary-card">
+              <div class="summary-number">23</div>
+              <div class="summary-label">Issues Found</div>
+              <div class="summary-trend trend-down">
+                <i class="fas fa-arrow-down"></i>
+                <span>-8</span>
+              </div>
+            </div>
+            
+            <div class="summary-card">
+              <div class="summary-number">12.3</div>
+              <div class="summary-label">Avg Response Time</div>
+              <div class="summary-trend trend-up">
+                <i class="fas fa-arrow-up"></i>
+                <span>+0.5h</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Types -->
+        <div class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Report Types</h2>
+            <a href="#" class="view-all-link">View All</a>
+          </div>
+          
+          <div class="report-grid">
+            <a href="kpi-metrics-report.html" class="report-card">
+              <div class="report-icon" style="background: var(--primary-600);">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <div class="report-title">KPI Metrics</div>
+              <div class="report-desc">Performance indicators and analytics</div>
+              <div class="report-meta">
+                <span>Updated 2h ago</span>
+                <span>📊</span>
+              </div>
+            </a>
+            
+            <div class="report-card" onclick="openReport('stock')">
+              <div class="report-icon" style="background: var(--success-600);">
+                <i class="fas fa-boxes"></i>
+              </div>
+              <div class="report-title">Stock Report</div>
+              <div class="report-desc">Inventory levels and availability</div>
+              <div class="report-meta">
+                <span>Updated 4h ago</span>
+                <span>📦</span>
+              </div>
+            </div>
+            
+            <div class="report-card" onclick="openReport('pricing')">
+              <div class="report-icon" style="background: var(--warning-600);">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="report-title">Pricing Report</div>
+              <div class="report-desc">Price accuracy and compliance</div>
+              <div class="report-meta">
+                <span>Updated 6h ago</span>
+                <span>💰</span>
+              </div>
+            </div>
+            
+            <div class="report-card" onclick="openReport('compliance')">
+              <div class="report-icon" style="background: var(--error-600);">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="report-title">Compliance</div>
+              <div class="report-desc">Regulatory and policy adherence</div>
+              <div class="report-meta">
+                <span>Updated 8h ago</span>
+                <span>🛡️</span>
+              </div>
+            </div>
+            
+            <div class="report-card" onclick="openReport('sales')">
+              <div class="report-icon" style="background: #8b5cf6;">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="report-title">Sales Analytics</div>
+              <div class="report-desc">Revenue trends and patterns</div>
+              <div class="report-meta">
+                <span>Updated 1d ago</span>
+                <span>📈</span>
+              </div>
+            </div>
+            
+            <div class="report-card" onclick="openReport('audit')">
+              <div class="report-icon" style="background: #10b981;">
+                <i class="fas fa-clipboard-check"></i>
+              </div>
+              <div class="report-title">Audit Summary</div>
+              <div class="report-desc">Completed audits overview</div>
+              <div class="report-meta">
+                <span>Updated 2d ago</span>
+                <span>✅</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="content-section">
+          <div class="chart-container">
+            <div class="chart-header">
+              <h3 class="chart-title">Weekly Performance</h3>
+              <button onclick="toggleChartView()" style="background: var(--neutral-100); border: 1px solid var(--neutral-200); border-radius: var(--radius-md); padding: var(--space-1) var(--space-2); font-size: var(--text-xs); cursor: pointer;">
+                <i class="fas fa-chart-area" style="margin-right: var(--space-1);"></i>View
+              </button>
+            </div>
+            
+            <div class="chart-view">
+              <div class="chart-bars">
+                <div class="chart-bar" style="height: 45%;"></div>
+                <div class="chart-bar" style="height: 60%;"></div>
+                <div class="chart-bar" style="height: 75%;"></div>
+                <div class="chart-bar" style="height: 85%;"></div>
+                <div class="chart-bar" style="height: 90%;"></div>
+                <div class="chart-bar" style="height: 95%;"></div>
+                <div class="chart-bar" style="height: 88%;"></div>
+              </div>
+            </div>
+            
+            <div class="chart-labels">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Reports -->
+        <div class="content-section">
+          <div class="section-header">
+            <h2 class="section-title">Recent Reports</h2>
+            <a href="#" class="view-all-link">View All</a>
+          </div>
+          
+          <div class="recent-reports">
+            <div class="report-item" onclick="downloadReport('compliance-2024-01')">
+              <div class="report-status status-ready"></div>
+              <div class="report-details">
+                <div class="report-name">Monthly Compliance Report</div>
+                <div class="report-time">Generated 2 hours ago</div>
+              </div>
+              <button class="report-action">Download</button>
+            </div>
+            
+            <div class="report-item" onclick="downloadReport('stock-2024-01')">
+              <div class="report-status status-ready"></div>
+              <div class="report-details">
+                <div class="report-name">Stock Availability Report</div>
+                <div class="report-time">Generated 4 hours ago</div>
+              </div>
+              <button class="report-action">Download</button>
+            </div>
+            
+            <div class="report-item" onclick="viewReport('pricing-2024-01')">
+              <div class="report-status status-processing"></div>
+              <div class="report-details">
+                <div class="report-name">Pricing Accuracy Report</div>
+                <div class="report-time">Processing...</div>
+              </div>
+              <button class="report-action">View</button>
+            </div>
+            
+            <div class="report-item" onclick="retryReport('audit-2024-01')">
+              <div class="report-status status-error"></div>
+              <div class="report-details">
+                <div class="report-name">Weekly Audit Summary</div>
+                <div class="report-time">Failed - 1 day ago</div>
+              </div>
+              <button class="report-action">Retry</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="content-section">
+          <div class="export-section">
+            <div class="section-header" style="margin-bottom: var(--space-3);">
+              <h2 class="section-title">Export & Share</h2>
+            </div>
+            
+            <div class="export-buttons">
+              <button class="export-btn pdf" onclick="exportToPDF()">
+                <i class="fas fa-file-pdf"></i>
+                Export PDF
+              </button>
+              
+              <button class="export-btn excel" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i>
+                Export Excel
+              </button>
+              
+              <button class="export-btn email" onclick="emailReport()">
+                <i class="fas fa-envelope"></i>
+                Email Report
+              </button>
+              
+              <button class="export-btn share" onclick="shareReport()">
+                <i class="fas fa-share-alt"></i>
+                Share Link
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function goBack() {
+        window.location.href = 'dashboard.html';
+      }
+      
+      function refreshReports() {
+        showToast('Refreshing reports...');
+        // Simulate refresh animation
+        const refreshBtn = document.querySelector('.header-button:last-child i');
+        refreshBtn.style.animation = 'spin 1s linear';
+        
+        setTimeout(() => {
+          refreshBtn.style.animation = '';
+          showToast('Reports updated successfully');
+        }, 1000);
+      }
+      
+      function setDateFilter(period) {
+        // Remove active class from all filters
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+          chip.classList.remove('active');
+        });
+        
+        // Add active class to selected filter
+        document.getElementById(`filter-${period}`).classList.add('active');
+        
+        // Update data based on period
+        updateReportsData(period);
+        showToast(`Showing ${period} data`);
+      }
+      
+      function updateReportsData(period) {
+        // Simulate different data for different periods
+        const data = {
+          today: { reports: 47, compliance: 94.2, issues: 23, response: 12.3 },
+          week: { reports: 156, compliance: 92.8, issues: 89, response: 11.8 },
+          month: { reports: 623, compliance: 91.5, issues: 267, response: 13.2 },
+          quarter: { reports: 1847, compliance: 90.2, issues: 756, response: 14.1 },
+          year: { reports: 7234, compliance: 89.8, issues: 2891, response: 15.3 }
+        };
+        
+        const periodData = data[period];
+        const summaryCards = document.querySelectorAll('.summary-number');
+        
+        if (summaryCards.length >= 4) {
+          summaryCards[0].textContent = periodData.reports;
+          summaryCards[1].textContent = periodData.compliance + '%';
+          summaryCards[2].textContent = periodData.issues;
+          summaryCards[3].textContent = periodData.response;
+        }
+      }
+      
+      function openReport(type) {
+        const reportUrls = {
+          stock: '#',
+          pricing: '#',
+          compliance: '#',
+          sales: '#',
+          audit: 'audit-summary.html'
+        };
+        
+        if (reportUrls[type] === '#') {
+          showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} report coming soon!`);
+        } else {
+          window.location.href = reportUrls[type];
+        }
+      }
+      
+      function toggleChartView() {
+        showToast('Chart view toggled');
+      }
+      
+      function downloadReport(reportId) {
+        showToast(`Downloading ${reportId}...`);
+        // Simulate download
+        setTimeout(() => {
+          showToast('Report downloaded successfully');
+        }, 1500);
+      }
+      
+      function viewReport(reportId) {
+        showToast(`Opening ${reportId}...`);
+      }
+      
+      function retryReport(reportId) {
+        showToast(`Retrying ${reportId}...`);
+        // Simulate retry
+        setTimeout(() => {
+          showToast('Report generation started');
+        }, 1000);
+      }
+      
+      function exportToPDF() {
+        showToast('Generating PDF export...');
+        setTimeout(() => {
+          showToast('PDF exported successfully');
+        }, 2000);
+      }
+      
+      function exportToExcel() {
+        showToast('Generating Excel export...');
+        setTimeout(() => {
+          showToast('Excel file exported successfully');
+        }, 2000);
+      }
+      
+      function emailReport() {
+        showToast('Opening email composer...');
+        // In a real app, this would open email client
+      }
+      
+      function shareReport() {
+        if (navigator.share) {
+          navigator.share({
+            title: 'Retail Audit Reports',
+            text: 'Check out our latest retail audit reports and analytics',
+            url: window.location.href
+          });
+        } else {
+          showToast('Report link copied to clipboard');
+        }
+      }
+      
+      function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          top: 100px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: var(--neutral-800);
+          color: var(--neutral-0);
+          padding: var(--space-3) var(--space-4);
+          border-radius: var(--radius-lg);
+          font-size: var(--text-sm);
+          font-weight: var(--font-medium);
+          z-index: 100;
+          animation: slideDown 0.3s ease;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+          }
+        }, 3000);
+      }
+      
+      // Add CSS animation for refresh button
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+      
+      // Initialize with today's data
+      document.addEventListener('DOMContentLoaded', function() {
+        updateReportsData('today');
+      });
+    </script>
+  </body>
+</html>
