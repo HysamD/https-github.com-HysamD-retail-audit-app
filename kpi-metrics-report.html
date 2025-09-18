@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KPI Metrics Report</title>
+    <style>
+      :root {
+        --primary-50: #eff6ff;
+        --primary-100: #dbeafe;
+        --primary-500: #3b82f6;
+        --primary-600: #2563eb;
+        --primary-700: #1d4ed8;
+        --success-50: #f0fdf4;
+        --success-100: #dcfce7;
+        --success-500: #22c55e;
+        --success-600: #16a34a;
+        --warning-50: #fffbeb;
+        --warning-100: #fef3c7;
+        --warning-500: #f59e0b;
+        --warning-600: #d97706;
+        --error-50: #fef2f2;
+        --error-100: #fee2e2;
+        --error-500: #ef4444;
+        --error-600: #dc2626;
+        --neutral-0: #ffffff;
+        --neutral-50: #f9fafb;
+        --neutral-100: #f3f4f6;
+        --neutral-200: #e5e7eb;
+        --neutral-300: #d1d5db;
+        --neutral-400: #9ca3af;
+        --neutral-500: #6b7280;
+        --neutral-600: #4b5563;
+        --neutral-700: #374151;
+        --neutral-800: #1f2937;
+        --neutral-900: #111827;
+        --text-xs: 0.75rem;
+        --text-sm: 0.875rem;
+        --text-base: 1rem;
+        --text-lg: 1.125rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.5rem;
+        --leading-tight: 1.25;
+        --leading-normal: 1.5;
+        --font-normal: 400;
+        --font-medium: 500;
+        --font-semibold: 600;
+        --font-bold: 700;
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+        --space-12: 3rem;
+        --radius-sm: 0.25rem;
+        --radius-md: 0.375rem;
+        --radius-lg: 0.5rem;
+        --radius-xl: 0.75rem;
+        --radius-2xl: 1rem;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .kpi-phone-frame {
+        width: 375px;
+        min-height: 812px;
+        background: var(--neutral-0);
+        border-radius: 40px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--neutral-200);
+        margin: var(--space-8);
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .kpi-auto-layout {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+      
+      .kpi-auto-layout-horizontal {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--space-3);
+      }
+      
+      .kpi-card {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+      }
+      
+      .kpi-metric-card {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-3);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .kpi-metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-500), #8b5cf6);
+      }
+      
+      .kpi-chart-container {
+        background: var(--neutral-0);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--neutral-200);
+        position: relative;
+      }
+      
+      .kpi-progress-bar {
+        width: 100%;
+        height: 8px;
+        background: var(--neutral-200);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+      }
+      
+      .kpi-progress-fill {
+        height: 100%;
+        border-radius: var(--radius-xl);
+        transition: width 0.3s ease;
+      }
+      
+      .kpi-donut-chart {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-2);
+      }
+      
+      .kpi-trend-up {
+        color: var(--success-600);
+      }
+      
+      .kpi-trend-down {
+        color: var(--error-600);
+      }
+      
+      .kpi-trend-neutral {
+        color: var(--neutral-500);
+      }
+      
+      .kpi-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+      }
+      
+      .kpi-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-2);
+      }
+      
+      .kpi-scroll-container {
+        flex: 1;
+        overflow-y: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      
+      .kpi-scroll-container::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .kpi-filter-chip {
+        background: var(--neutral-100);
+        border: 1px solid var(--neutral-200);
+        border-radius: var(--radius-xl);
+        padding: var(--space-1) var(--space-3);
+        font-size: var(--text-xs);
+        font-weight: var(--font-medium);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+      }
+      
+      .kpi-filter-chip.active {
+        background: var(--primary-600);
+        color: var(--neutral-0);
+        border-color: var(--primary-600);
+      }
+      
+      .kpi-filter-chip:hover {
+        background: var(--neutral-200);
+      }
+      
+      .kpi-filter-chip.active:hover {
+        background: var(--primary-700);
+      }
+      
+      .kpi-bar-chart {
+        display: flex;
+        align-items: end;
+        gap: var(--space-1);
+        height: 60px;
+        margin: var(--space-3) 0;
+      }
+      
+      .kpi-bar {
+        flex: 1;
+        background: linear-gradient(to top, var(--primary-600), var(--primary-400));
+        border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        min-height: 8px;
+        transition: all 0.3s ease;
+      }
+      
+      .kpi-line-chart {
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-50) 0%, var(--success-50) 100%);
+        border-radius: var(--radius-lg);
+        position: relative;
+        overflow: hidden;
+        margin: var(--space-3) 0;
+      }
+      
+      .kpi-line-chart::after {
+        content: '';
+        position: absolute;
+        bottom: 20px;
+        left: 10px;
+        right: 10px;
+        height: 2px;
+        background: linear-gradient(90deg, var(--primary-600), var(--success-600));
+        border-radius: 1px;
+      }
+      
+      .kpi-export-button {
+        background: var(--success-600);
+        color: var(--neutral-0);
+        border: none;
+        border-radius: var(--radius-lg);
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+        font-weight: var(--font-medium);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .kpi-export-button:hover {
+        background: var(--success-700);
+        transform: translateY(-1px);
+      }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body style="background: var(--neutral-100); margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div class="kpi-phone-frame">
+      <!-- Header -->
+      <div style="background: linear-gradient(135deg, var(--primary-600) 0%, #8b5cf6 100%); color: var(--neutral-0); padding: var(--space-4); position: sticky; top: 0; z-index: 10;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+          <button onclick="goBack()" style="background: none; border: none; color: var(--neutral-0); cursor: pointer;">
+            <i class="fas fa-arrow-left" style="font-size: var(--text-xl);"></i>
+          </button>
+          <h1 style="font-size: var(--text-lg); font-weight: var(--font-semibold); margin: 0;">KPI Metrics</h1>
+          <button onclick="exportReport()" style="background: rgba(255, 255, 255, 0.2); border: none; border-radius: var(--radius-lg); padding: var(--space-1) var(--space-2); color: var(--neutral-0); cursor: pointer;">
+            <i class="fas fa-download" style="font-size: var(--text-sm);"></i>
+          </button>
+        </div>
+        
+        <!-- Time Period Filter -->
+        <div style="display: flex; gap: var(--space-2); overflow-x: auto; scrollbar-width: none;">
+          <button onclick="setTimePeriod('7d')" class="kpi-filter-chip active" id="filter-7d" style="background: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3); color: var(--neutral-0);">7 Days</button>
+          <button onclick="setTimePeriod('30d')" class="kpi-filter-chip" id="filter-30d" style="background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: var(--neutral-0);">30 Days</button>
+          <button onclick="setTimePeriod('90d')" class="kpi-filter-chip" id="filter-90d" style="background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: var(--neutral-0);">90 Days</button>
+          <button onclick="setTimePeriod('1y')" class="kpi-filter-chip" id="filter-1y" style="background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); color: var(--neutral-0);">1 Year</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Content -->
+      <div class="kpi-scroll-container" style="background: var(--neutral-50);">
+        <div class="kpi-auto-layout" style="padding: var(--space-4);">
+          
+          <!-- Key Metrics Overview -->
+          <div class="kpi-grid-2">
+            <div class="kpi-metric-card">
+              <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--primary-600); margin-bottom: var(--space-1);">94.2%</div>
+              <div style="font-size: var(--text-xs); color: var(--neutral-600); margin-bottom: var(--space-2);">Audit Completion Rate</div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-1);">
+                <i class="fas fa-arrow-up kpi-trend-up" style="font-size: var(--text-xs);"></i>
+                <span style="font-size: var(--text-xs); color: var(--success-600); font-weight: var(--font-medium);">+2.3%</span>
+              </div>
+            </div>
+            
+            <div class="kpi-metric-card">
+              <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--success-600); margin-bottom: var(--space-1);">87.5%</div>
+              <div style="font-size: var(--text-xs); color: var(--neutral-600); margin-bottom: var(--space-2);">Compliance Score</div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-1);">
+                <i class="fas fa-arrow-up kpi-trend-up" style="font-size: var(--text-xs);"></i>
+                <span style="font-size: var(--text-xs); color: var(--success-600); font-weight: var(--font-medium);">+5.1%</span>
+              </div>
+            </div>
+            
+            <div class="kpi-metric-card">
+              <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--warning-600); margin-bottom: var(--space-1);">12.3</div>
+              <div style="font-size: var(--text-xs); color: var(--neutral-600); margin-bottom: var(--space-2);">Avg. Audit Time (min)</div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-1);">
+                <i class="fas fa-arrow-down kpi-trend-up" style="font-size: var(--text-xs);"></i>
+                <span style="font-size: var(--text-xs); color: var(--success-600); font-weight: var(--font-medium);">-1.2min</span>
+              </div>
+            </div>
+            
+            <div class="kpi-metric-card">
+              <div style="font-size: var(--text-2xl); font-weight: var(--font-bold); color: var(--error-600); margin-bottom: var(--space-1);">23</div>
+              <div style="font-size: var(--text-xs); color: var(--neutral-600); margin-bottom: var(--space-2);">Issues Found</div>
+              <div style="display: flex; align-items: center; justify-content: center; gap: var(--space-1);">
+                <i class="fas fa-arrow-up kpi-trend-down" style="font-size: var(--text-xs);"></i>
+                <span style="font-size: var(--text-xs); color: var(--error-600); font-weight: var(--font-medium);">+8</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance Trends Chart -->
+          <div class="kpi-chart-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+              <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--neutral-800); margin: 0;">Performance Trends</h3>
+              <button onclick="toggleChartView()" style="background: var(--neutral-100); border: 1px solid var(--neutral-200); border-radius: var(--radius-md); padding: var(--space-1) var(--space-2); font-size: var(--text-xs); cursor: pointer;">
+                <i class="fas fa-chart-line" style="margin-right: var(--space-1);"></i>View
+              </button>
+            </div>
+            
+            <div class="kpi-line-chart">
+              <div style="position: absolute; top: var(--space-2); left: var(--space-2); font-size: var(--text-xs); color: var(--neutral-500);">100%</div>
+              <div style="position: absolute; bottom: var(--space-2); left: var(--space-2); font-size: var(--text-xs); color: var(--neutral-500);">0%</div>
+              <div style="position: absolute; bottom: var(--space-1); right: var(--space-2); font-size: var(--text-xs); color: var(--neutral-500);">Today</div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: var(--space-2);">
+              <div style="display: flex; align-items: center; gap: var(--space-1);">
+                <div style="width: 8px; height: 8px; background: var(--primary-600); border-radius: 50%;"></div>
+                <span style="font-size: var(--text-xs); color: var(--neutral-600);">Completion Rate</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-1);">
+                <div style="width: 8px; height: 8px; background: var(--success-600); border-radius: 50%;"></div>
+                <span style="font-size: var(--text-xs); color: var(--neutral-600);">Compliance</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Performance -->
+          <div class="kpi-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+              <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--neutral-800); margin: 0;">Category Performance</h3>
+              <button class="kpi-export-button">
+                <i class="fas fa-download" style="margin-right: var(--space-1);"></i>Export
+              </button>
+            </div>
+            
+            <div class="kpi-auto-layout" style="gap: var(--space-3);">
+              <!-- Stock Availability -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-1);">
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--neutral-700);">Stock Availability</span>
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--success-600);">92%</span>
+                </div>
+                <div class="kpi-progress-bar">
+                  <div class="kpi-progress-fill" style="width: 92%; background: linear-gradient(90deg, var(--success-500), var(--success-400));"></div>
+                </div>
+              </div>
+              
+              <!-- Pricing Accuracy -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-1);">
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--neutral-700);">Pricing Accuracy</span>
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--primary-600);">89%</span>
+                </div>
+                <div class="kpi-progress-bar">
+                  <div class="kpi-progress-fill" style="width: 89%; background: linear-gradient(90deg, var(--primary-500), var(--primary-400));"></div>
+                </div>
+              </div>
+              
+              <!-- Planogram Compliance -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-1);">
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--neutral-700);">Planogram Compliance</span>
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--warning-600);">76%</span>
+                </div>
+                <div class="kpi-progress-bar">
+                  <div class="kpi-progress-fill" style="width: 76%; background: linear-gradient(90deg, var(--warning-500), var(--warning-400));"></div>
+                </div>
+              </div>
+              
+              <!-- Promotional Compliance -->
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-1);">
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--neutral-700);">Promotional Compliance</span>
+                  <span style="font-size: var(--text-sm); font-weight: var(--font-semibold); color: var(--error-600);">68%</span>
+                </div>
+                <div class="kpi-progress-bar">
+                  <div class="kpi-progress-fill" style="width: 68%; background: linear-gradient(90deg, var(--error-500), var(--error-400));"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Store Performance Comparison -->
+          <div class="kpi-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+              <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--neutral-800); margin: 0;">Top Performing Stores</h3>
+              <button onclick="viewAllStores()" style="background: none; border: none; color: var(--primary-600); font-size: var(--text-xs); cursor: pointer;">View All</button>
+            </div>
+            
+            <div class="kpi-auto-layout" style="gap: var(--space-2);">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2); background: var(--success-50); border-radius: var(--radius-md);">
+                <div>
+                  <div style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--neutral-800);">Store #001 - Downtown</div>
+                  <div style="font-size: var(--text-xs); color: var(--neutral-600);">98.5% compliance</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-1);">
+                  <i class="fas fa-trophy" style="color: #fbbf24; font-size: var(--text-sm);"></i>
+                  <span style="font-size: var(--text-xs); color: var(--success-600); font-weight: var(--font-semibold);">#1</span>
+                </div>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2); background: var(--neutral-50); border-radius: var(--radius-md);">
+                <div>
+                  <div style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--neutral-800);">Store #003 - Mall Plaza</div>
+                  <div style="font-size: var(--text-xs); color: var(--neutral-600);">96.2% compliance</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-1);">
+                  <i class="fas fa-medal" style="color: #d1d5db; font-size: var(--text-sm);"></i>
+                  <span style="font-size: var(--text-xs); color: var(--neutral-600); font-weight: var(--font-semibold);">#2</span>
+                </div>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2); background: var(--neutral-50); border-radius: var(--radius-md);">
+                <div>
+                  <div style="font-size: var(--text-sm); font-weight: var(--font-medium); color: var(--neutral-800);">Store #007 - Westside</div>
+                  <div style="font-size: var(--text-xs); color: var(--neutral-600);">94.8% compliance</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-1);">
+                  <i class="fas fa-medal" style="color: #cd7c2f; font-size: var(--text-sm);"></i>
+                  <span style="font-size: var(--text-xs); color: var(--neutral-600); font-weight: var(--font-semibold);">#3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Issue Breakdown -->
+          <div class="kpi-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+              <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--neutral-800); margin: 0;">Issue Breakdown</h3>
+              <div style="display: flex; gap: var(--space-2);">
+                <span style="font-size: var(--text-xs); color: var(--neutral-500);">Total: 23 issues</span>
+              </div>
+            </div>
+            
+            <div class="kpi-grid-2" style="gap: var(--space-4);">
+              <div>
+                <div class="kpi-donut-chart" style="background: conic-gradient(var(--error-500) 0deg 144deg, var(--warning-500) 144deg 216deg, var(--primary-500) 216deg 288deg, var(--neutral-300) 288deg 360deg);">
+                  <div style="background: var(--neutral-0); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: var(--text-xs); font-weight: var(--font-bold); color: var(--neutral-800);">23</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="kpi-auto-layout" style="gap: var(--space-2); justify-content: center;">
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                  <div style="width: 12px; height: 12px; background: var(--error-500); border-radius: 50%;"></div>
+                  <div>
+                    <div style="font-size: var(--text-xs); font-weight: var(--font-medium); color: var(--neutral-800);">Critical (9)</div>
+                    <div style="font-size: var(--text-xs); color: var(--neutral-500);">39%</div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                  <div style="width: 12px; height: 12px; background: var(--warning-500); border-radius: 50%;"></div>
+                  <div>
+                    <div style="font-size: var(--text-xs); font-weight: var(--font-medium); color: var(--neutral-800);">Medium (7)</div>
+                    <div style="font-size: var(--text-xs); color: var(--neutral-500);">30%</div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: var(--space-2);">
+                  <div style="width: 12px; height: 12px; background: var(--primary-500); border-radius: 50%;"></div>
+                  <div>
+                    <div style="font-size: var(--text-xs); font-weight: var(--font-medium); color: var(--neutral-800);">Low (7)</div>
+                    <div style="font-size: var(--text-xs); color: var(--neutral-500);">31%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly Performance Bar Chart -->
+          <div class="kpi-chart-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+              <h3 style="font-size: var(--text-base); font-weight: var(--font-semibold); color: var(--neutral-800); margin: 0;">Weekly Performance</h3>
+              <button class="kpi-export-button">
+                <i class="fas fa-chart-bar" style="margin-right: var(--space-1);"></i>Details
+              </button>
+            </div>
+            
+            <div class="kpi-bar-chart">
+              <div class="kpi-bar" style="height: 45%;"></div>
+              <div class="kpi-bar" style="height: 60%;"></div>
+              <div class="kpi-bar" style="height: 75%;"></div>
+              <div class="kpi-bar" style="height: 85%;"></div>
+              <div class="kpi-bar" style="height: 90%;"></div>
+              <div class="kpi-bar" style="height: 95%;"></div>
+              <div class="kpi-bar" style="height: 88%;"></div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--neutral-500); margin-top: var(--space-2);">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="kpi-auto-layout" style="gap: var(--space-3); padding-bottom: var(--space-6);">
+            <button onclick="generateDetailedReport()" style="width: 100%; background: var(--primary-600); color: var(--neutral-0); border: none; border-radius: var(--radius-lg); padding: var(--space-3); font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer; transition: all 0.2s ease;">
+              <i class="fas fa-file-alt" style="margin-right: var(--space-2);"></i>
+              Generate Detailed Report
+            </button>
+            
+            <div class="kpi-grid-2">
+              <button onclick="exportReport()" style="background: var(--success-600); color: var(--neutral-0); border: none; border-radius: var(--radius-lg); padding: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer; transition: all 0.2s ease;">
+                <i class="fas fa-download" style="margin-right: var(--space-1);"></i>Export PDF
+              </button>
+              
+              <button onclick="shareReport()" style="background: var(--neutral-600); color: var(--neutral-0); border: none; border-radius: var(--radius-lg); padding: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-medium); cursor: pointer; transition: all 0.2s ease;">
+                <i class="fas fa-share-alt" style="margin-right: var(--space-1);"></i>Share
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function goBack() {
+        window.location.href = 'dashboard.html';
+      }
+      
+      function setTimePeriod(period) {
+        // Remove active class from all filters
+        document.querySelectorAll('.kpi-filter-chip').forEach(chip => {
+          chip.classList.remove('active');
+          chip.style.background = 'rgba(255, 255, 255, 0.1)';
+          chip.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        });
+        
+        // Add active class to selected filter
+        const activeFilter = document.getElementById(`filter-${period}`);
+        activeFilter.classList.add('active');
+        activeFilter.style.background = 'rgba(255, 255, 255, 0.2)';
+        activeFilter.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+        
+        // Update metrics based on period (simulation)
+        updateMetrics(period);
+        showSuccess(`Updated metrics for ${period === '7d' ? '7 days' : period === '30d' ? '30 days' : period === '90d' ? '90 days' : '1 year'}`);
+      }
+      
+      function updateMetrics(period) {
+        // Simulate different metrics for different periods
+        const metrics = {
+          '7d': { completion: '94.2%', compliance: '87.5%', time: '12.3', issues: '23' },
+          '30d': { completion: '92.8%', compliance: '85.2%', time: '13.1', issues: '89' },
+          '90d': { completion: '91.5%', compliance: '83.7%', time: '13.8', issues: '267' },
+          '1y': { completion: '90.2%', compliance: '82.1%', time: '14.2', issues: '1,234' }
+        };
+        
+        const data = metrics[period];
+        const metricCards = document.querySelectorAll('.kpi-metric-card');
+        
+        if (metricCards.length >= 4) {
+          metricCards[0].querySelector('div').textContent = data.completion;
+          metricCards[1].querySelector('div').textContent = data.compliance;
+          metricCards[2].querySelector('div').textContent = data.time;
+          metricCards[3].querySelector('div').textContent = data.issues;
+        }
+      }
+      
+      function toggleChartView() {
+        showSuccess('Chart view toggled');
+      }
+      
+      function viewAllStores() {
+        showSuccess('Navigating to all stores view');
+      }
+      
+      function generateDetailedReport() {
+        showSuccess('Generating detailed KPI report...');
+      }
+      
+      function exportReport() {
+        showSuccess('Exporting KPI metrics report as PDF...');
+      }
+      
+      function shareReport() {
+        if (navigator.share) {
+          navigator.share({
+            title: 'KPI Metrics Report',
+            text: 'Retail audit KPI metrics and performance data',
+            url: window.location.href
+          });
+        } else {
+          showSuccess('Report link copied to clipboard');
+        }
+      }
+      
+      function showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.style.cssText = `
+          position: fixed;
+          top: var(--space-4);
+          left: var(--space-4);
+          right: var(--space-4);
+          background: var(--success-600);
+          color: var(--neutral-0);
+          padding: var(--space-3);
+          border-radius: var(--radius-lg);
+          z-index: 50;
+          text-align: center;
+          font-size: var(--text-sm);
+          font-weight: var(--font-medium);
+          box-shadow: var(--shadow-lg);
+        `;
+        successDiv.innerHTML = `<i class="fas fa-check-circle" style="margin-right: var(--space-2);"></i>${message}`;
+        document.body.appendChild(successDiv);
+        
+        setTimeout(() => {
+          if (document.body.contains(successDiv)) {
+            document.body.removeChild(successDiv);
+          }
+        }, 3000);
+      }
+      
+      // Initialize with default period
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimePeriod('7d');
+      });
+    </script>
+  </body>
+</html>
