@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Barcode Scanner - Retail Audit App</title>
+    <style>
+      :root {
+        --primary-50: #eff6ff;
+        --primary-100: #dbeafe;
+        --primary-500: #3b82f6;
+        --primary-600: #2563eb;
+        --primary-700: #1d4ed8;
+        --success-50: #f0fdf4;
+        --success-100: #dcfce7;
+        --success-500: #22c55e;
+        --success-600: #16a34a;
+        --warning-50: #fffbeb;
+        --warning-100: #fef3c7;
+        --warning-500: #f59e0b;
+        --warning-600: #d97706;
+        --error-50: #fef2f2;
+        --error-100: #fee2e2;
+        --error-500: #ef4444;
+        --error-600: #dc2626;
+        --neutral-0: #ffffff;
+        --neutral-50: #f9fafb;
+        --neutral-100: #f3f4f6;
+        --neutral-200: #e5e7eb;
+        --neutral-300: #d1d5db;
+        --neutral-400: #9ca3af;
+        --neutral-500: #6b7280;
+        --neutral-600: #4b5563;
+        --neutral-700: #374151;
+        --neutral-800: #1f2937;
+        --neutral-900: #111827;
+        --text-xs: 0.75rem;
+        --text-sm: 0.875rem;
+        --text-base: 1rem;
+        --text-lg: 1.125rem;
+        --text-xl: 1.25rem;
+        --text-2xl: 1.5rem;
+        --leading-tight: 1.25;
+        --leading-normal: 1.5;
+        --font-normal: 400;
+        --font-medium: 500;
+        --font-semibold: 600;
+        --font-bold: 700;
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.25rem;
+        --space-6: 1.5rem;
+        --space-8: 2rem;
+        --radius-sm: 0.25rem;
+        --radius-md: 0.375rem;
+        --radius-lg: 0.5rem;
+        --radius-xl: 0.75rem;
+        --radius-2xl: 1rem;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .scan-phone-frame {
+        width: 375px;
+        min-height: 812px;
+        background: var(--neutral-0);
+        border-radius: 40px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--neutral-200);
+        margin: var(--space-8);
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .scan-header {
+        background: linear-gradient(135deg, var(--success-600) 0%, #10b981 100%);
+        color: var(--neutral-0);
+        padding: var(--space-4);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      
+      .header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-3);
+      }
+      
+      .scan-title {
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+        margin: 0;
+      }
+      
+      .header-button {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: var(--radius-lg);
+        padding: var(--space-2);
+        color: var(--neutral-0);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .header-button:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      
+      .scan-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-3);
+      }
+      
+      .stat-item {
+        text-align: center;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: var(--radius-lg);
+        padding: var(--space-2);
+      }
+      
+      .stat-number {
+        font-size: var(--text-base);
+        font-weight: var(--font-bold);
+        display: block;
+      }
+      
+      .stat-label {
+        font-size: var(--text-xs);
+        opacity: 0.8;
+        margin-top: var(--space-1);
+      }
+      
+      .scan-content {
+        flex: 1;
+        background: var(--neutral-900);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .camera-view {
+        flex: 1;
+        background: linear-gradient(45deg, #1f2937 25%, transparent 25%), 
+                    linear-gradient(-45deg, #1f2937 25%, transparent 25%), 
+                    linear-gradient(45deg, transparent 75%, #1f2937 75%), 
+                    linear-gradient(-45deg, transparent 75%, #1f2937 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .scan-overlay {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 250px;
+        height: 250px;
+        border: 2px solid var(--success-500);
+        border-radius: var(--radius-lg);
+        background: rgba(34, 197, 94, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { 
+          border-color: var(--success-500);
+          box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+        }
+        50% { 
+          border-color: var(--success-400);
+          box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+        }
+      }
+      
+      .scan-corners {
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+      }
+      
+      .corner {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        border: 3px solid var(--neutral-0);
+      }
+      
+      .corner.top-left {
+        top: 0;
+        left: 0;
+        border-right: none;
+        border-bottom: none;
+      }
+      
+      .corner.top-right {
+        top: 0;
+        right: 0;
+        border-left: none;
+        border-bottom: none;
+      }
+      
+      .corner.bottom-left {
+        bottom: 0;
+        left: 0;
+        border-right: none;
+        border-top: none;
+      }
+      
+      .corner.bottom-right {
+        bottom: 0;
+        right: 0;
+        border-left: none;
+        border-top: none;
+      }
+      
+      .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--success-500), transparent);
+        animation: scanLine 2s linear infinite;
+      }
+      
+      @keyframes scanLine {
+        0% { top: 0; }
+        100% { top: 100%; }
+      }
+      
+      .scan-instructions {
+        position: absolute;
+        bottom: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        color: var(--neutral-0);
+      }
+      
+      .instruction-text {
+        font-size: var(--text-base);
+        font-weight: var(--font-medium);
+        margin-bottom: var(--space-2);
+      }
+      
+      .instruction-subtext {
+        font-size: var(--text-sm);
+        opacity: 0.8;
+      }
+      
+      .scan-controls {
+        background: var(--neutral-0);
+        padding: var(--space-4);
+        border-top: 1px solid var(--neutral-200);
+      }
+      
+      .control-buttons {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-bottom: var(--space-4);
+      }
+      
+      .control-btn {
+        background: var(--neutral-100);
+        border: 1px solid var(--neutral-200);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .control-btn:hover {
+        background: var(--neutral-200);
+        transform: scale(1.05);
+      }
+      
+      .control-btn.primary {
+        background: var(--success-600);
+        color: var(--neutral-0);
+        border-color: var(--success-600);
+        width: 80px;
+        height: 80px;
+      }
+      
+      .control-btn.primary:hover {
+        background: var(--success-700);
+      }
+      
+      .recent-scans {
+        margin-top: var(--space-4);
+      }
+      
+      .recent-title {
+        font-size: var(--text-sm);
+        font-weight: var(--font-semibold);
+        color: var(--neutral-700);
+        margin-bottom: var(--space-3);
+      }
+      
+      .scan-history {
+        display: flex;
+        gap: var(--space-2);
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      
+      .scan-history::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .history-item {
+        background: var(--neutral-50);
+        border: 1px solid var(--neutral-200);
+        border-radius: var(--radius-lg);
+        padding: var(--space-3);
+        min-width: 120px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .history-item:hover {
+        background: var(--neutral-100);
+        transform: translateY(-2px);
+      }
+      
+      .history-barcode {
+        font-size: var(--text-xs);
+        font-weight: var(--font-bold);
+        color: var(--neutral-800);
+        margin-bottom: var(--space-1);
+      }
+      
+      .history-product {
+        font-size: var(--text-xs);
+        color: var(--neutral-600);
+        margin-bottom: var(--space-1);
+      }
+      
+      .history-time {
+        font-size: var(--text-xs);
+        color: var(--neutral-500);
+      }
+      
+      .scan-result-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+      
+      .scan-result-modal.show {
+        display: flex;
+      }
+      
+      .result-content {
+        background: var(--neutral-0);
+        border-radius: var(--radius-2xl);
+        padding: var(--space-6);
+        margin: var(--space-4);
+        max-width: 320px;
+        width: 100%;
+        text-align: center;
+        animation: slideUp 0.3s ease;
+      }
+      
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .result-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--success-100);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        color: var(--success-600);
+        font-size: var(--text-2xl);
+      }
+      
+      .result-title {
+        font-size: var(--text-lg);
+        font-weight: var(--font-semibold);
+        color: var(--neutral-800);
+        margin-bottom: var(--space-2);
+      }
+      
+      .result-details {
+        background: var(--neutral-50);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        margin: var(--space-4) 0;
+        text-align: left;
+      }
+      
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: var(--space-2);
+      }
+      
+      .detail-row:last-child {
+        margin-bottom: 0;
+      }
+      
+      .detail-label {
+        font-size: var(--text-sm);
+        color: var(--neutral-600);
+      }
+      
+      .detail-value {
+        font-size: var(--text-sm);
+        font-weight: var(--font-medium);
+        color: var(--neutral-800);
+      }
+      
+      .result-actions {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+      }
+      
+      .result-btn {
+        flex: 1;
+        padding: var(--space-3);
+        border-radius: var(--radius-lg);
+        font-size: var(--text-sm);
+        font-weight: var(--font-medium);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+      }
+      
+      .result-btn.primary {
+        background: var(--success-600);
+        color: var(--neutral-0);
+      }
+      
+      .result-btn.primary:hover {
+        background: var(--success-700);
+      }
+      
+      .result-btn.secondary {
+        background: var(--neutral-100);
+        color: var(--neutral-700);
+        border: 1px solid var(--neutral-200);
+      }
+      
+      .result-btn.secondary:hover {
+        background: var(--neutral-200);
+      }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body style="background: var(--neutral-100); margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div class="scan-phone-frame">
+      <!-- Header -->
+      <div class="scan-header">
+        <div class="header-controls">
+          <button onclick="goBack()" class="header-button">
+            <i class="fas fa-arrow-left" style="font-size: var(--text-xl);"></i>
+          </button>
+          <h1 class="scan-title">Barcode Scanner</h1>
+          <button onclick="toggleFlash()" class="header-button" id="flashBtn">
+            <i class="fas fa-bolt" style="font-size: var(--text-xl);"></i>
+          </button>
+        </div>
+        
+        <div class="scan-stats">
+          <div class="stat-item">
+            <span class="stat-number">47</span>
+            <div class="stat-label">Scanned Today</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">98%</span>
+            <div class="stat-label">Success Rate</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">1.2s</span>
+            <div class="stat-label">Avg. Speed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Camera View -->
+      <div class="scan-content">
+        <div class="camera-view">
+          <div class="scan-overlay">
+            <div class="scan-corners">
+              <div class="corner top-left"></div>
+              <div class="corner top-right"></div>
+              <div class="corner bottom-left"></div>
+              <div class="corner bottom-right"></div>
+            </div>
+            <div class="scan-line"></div>
+          </div>
+          
+          <div class="scan-instructions">
+            <div class="instruction-text">Position barcode in the frame</div>
+            <div class="instruction-subtext">Hold steady for automatic scanning</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="scan-controls">
+        <div class="control-buttons">
+          <button class="control-btn" onclick="switchCamera()">
+            <i class="fas fa-sync-alt" style="font-size: var(--text-lg);"></i>
+          </button>
+          
+          <button class="control-btn primary" onclick="simulateScan()">
+            <i class="fas fa-qrcode" style="font-size: var(--text-xl);"></i>
+          </button>
+          
+          <button class="control-btn" onclick="openGallery()">
+            <i class="fas fa-image" style="font-size: var(--text-lg);"></i>
+          </button>
+        </div>
+        
+        <div class="recent-scans">
+          <div class="recent-title">Recent Scans</div>
+          <div class="scan-history">
+            <div class="history-item" onclick="viewScanResult('123456789012')">
+              <div class="history-barcode">123456789012</div>
+              <div class="history-product">Coca Cola 500ml</div>
+              <div class="history-time">2 min ago</div>
+            </div>
+            
+            <div class="history-item" onclick="viewScanResult('987654321098')">
+              <div class="history-barcode">987654321098</div>
+              <div class="history-product">Bread Loaf</div>
+              <div class="history-time">5 min ago</div>
+            </div>
+            
+            <div class="history-item" onclick="viewScanResult('456789123456')">
+              <div class="history-barcode">456789123456</div>
+              <div class="history-product">Milk 1L</div>
+              <div class="history-time">12 min ago</div>
+            </div>
+            
+            <div class="history-item" onclick="viewScanResult('789123456789')">
+              <div class="history-barcode">789123456789</div>
+              <div class="history-product">Chips 150g</div>
+              <div class="history-time">18 min ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Result Modal -->
+    <div id="scanResultModal" class="scan-result-modal">
+      <div class="result-content">
+        <div class="result-icon">
+          <i class="fas fa-check"></i>
+        </div>
+        <h2 class="result-title">Product Found!</h2>
+        
+        <div class="result-details">
+          <div class="detail-row">
+            <span class="detail-label">Barcode:</span>
+            <span class="detail-value" id="resultBarcode">123456789012</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Product:</span>
+            <span class="detail-value" id="resultProduct">Coca Cola 500ml</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Price:</span>
+            <span class="detail-value" id="resultPrice">$2.49</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Stock:</span>
+            <span class="detail-value" id="resultStock">In Stock</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Location:</span>
+            <span class="detail-value" id="resultLocation">Aisle 3, Shelf B</span>
+          </div>
+        </div>
+        
+        <div class="result-actions">
+          <button class="result-btn secondary" onclick="closeScanResult()">Close</button>
+          <button class="result-btn primary" onclick="addToAudit()">Add to Audit</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let flashEnabled = false;
+      
+      function goBack() {
+        window.location.href = 'dashboard.html';
+      }
+      
+      function toggleFlash() {
+        flashEnabled = !flashEnabled;
+        const flashBtn = document.getElementById('flashBtn');
+        const icon = flashBtn.querySelector('i');
+        
+        if (flashEnabled) {
+          icon.className = 'fas fa-bolt';
+          flashBtn.style.background = 'rgba(255, 255, 255, 0.3)';
+          showToast('Flash enabled');
+        } else {
+          icon.className = 'fas fa-bolt';
+          flashBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+          showToast('Flash disabled');
+        }
+      }
+      
+      function switchCamera() {
+        showToast('Switching camera...');
+        // Simulate camera switch animation
+        const cameraView = document.querySelector('.camera-view');
+        cameraView.style.transform = 'scaleX(-1)';
+        setTimeout(() => {
+          cameraView.style.transform = 'scaleX(1)';
+        }, 500);
+      }
+      
+      function openGallery() {
+        showToast('Opening gallery...');
+        // In a real app, this would open the device gallery
+      }
+      
+      function simulateScan() {
+        showToast('Scanning...');
+        
+        // Simulate scanning delay
+        setTimeout(() => {
+          const products = [
+            { barcode: '123456789012', name: 'Coca Cola 500ml', price: '$2.49', stock: 'In Stock', location: 'Aisle 3, Shelf B' },
+            { barcode: '987654321098', name: 'Bread Loaf', price: '$3.99', stock: 'Low Stock', location: 'Aisle 1, Shelf A' },
+            { barcode: '456789123456', name: 'Milk 1L', price: '$4.29', stock: 'In Stock', location: 'Aisle 2, Shelf C' },
+            { barcode: '789123456789', name: 'Chips 150g', price: '$1.99', stock: 'In Stock', location: 'Aisle 4, Shelf D' }
+          ];
+          
+          const randomProduct = products[Math.floor(Math.random() * products.length)];
+          showScanResult(randomProduct);
+        }, 1500);
+      }
+      
+      function showScanResult(product) {
+        document.getElementById('resultBarcode').textContent = product.barcode;
+        document.getElementById('resultProduct').textContent = product.name;
+        document.getElementById('resultPrice').textContent = product.price;
+        document.getElementById('resultStock').textContent = product.stock;
+        document.getElementById('resultLocation').textContent = product.location;
+        
+        document.getElementById('scanResultModal').classList.add('show');
+      }
+      
+      function viewScanResult(barcode) {
+        const products = {
+          '123456789012': { barcode: '123456789012', name: 'Coca Cola 500ml', price: '$2.49', stock: 'In Stock', location: 'Aisle 3, Shelf B' },
+          '987654321098': { barcode: '987654321098', name: 'Bread Loaf', price: '$3.99', stock: 'Low Stock', location: 'Aisle 1, Shelf A' },
+          '456789123456': { barcode: '456789123456', name: 'Milk 1L', price: '$4.29', stock: 'In Stock', location: 'Aisle 2, Shelf C' },
+          '789123456789': { barcode: '789123456789', name: 'Chips 150g', price: '$1.99', stock: 'In Stock', location: 'Aisle 4, Shelf D' }
+        };
+        
+        showScanResult(products[barcode]);
+      }
+      
+      function closeScanResult() {
+        document.getElementById('scanResultModal').classList.remove('show');
+      }
+      
+      function addToAudit() {
+        showToast('Added to current audit');
+        closeScanResult();
+      }
+      
+      function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+          position: fixed;
+          top: 100px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: var(--neutral-800);
+          color: var(--neutral-0);
+          padding: var(--space-3) var(--space-4);
+          border-radius: var(--radius-lg);
+          font-size: var(--text-sm);
+          font-weight: var(--font-medium);
+          z-index: 100;
+          animation: slideDown 0.3s ease;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          document.body.removeChild(toast);
+        }, 2000);
+      }
+      
+      // Simulate real-time scanning animation
+      document.addEventListener('DOMContentLoaded', function() {
+        const overlay = document.querySelector('.scan-overlay');
+        let isScanning = false;
+        
+        setInterval(() => {
+          if (!isScanning && Math.random() > 0.7) {
+            overlay.style.borderColor = 'var(--warning-500)';
+            setTimeout(() => {
+              overlay.style.borderColor = 'var(--success-500)';
+            }, 200);
+          }
+        }, 3000);
+      });
+    </script>
+  </body>
+</html>
